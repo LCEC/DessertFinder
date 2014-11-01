@@ -12,10 +12,21 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class CsvLoader {
-	private static final String CELL_REGEX = "(?:([^,\"\n]*)|\"((?:[^\"]|\"\")*)\")";
+	private static final String CELL_REGEX = "(?:([^,\"\n]*+)|\"((?:[^\"]|\"\")*+)\")";
 	private static final String ROW_REGEX = String.format(
 			"%1$s,%1$s,%1$s,%1$s,%1$s,%1$s,%1$s,%1$s,%1$s", CELL_REGEX);
 	private static final Pattern ROW_PATTERN = Pattern.compile(ROW_REGEX);
+
+	public static void main(String[] args) {
+		System.out.println(CELL_REGEX);
+		System.out.println(ROW_REGEX);
+	}
+
+	private DataInterface db;
+
+	public CsvLoader(DataInterface db) {
+		this.db = db;
+	}
 
 	private int countChars(String s, char c) {
 		int count = 0;
@@ -54,18 +65,18 @@ public class CsvLoader {
 					row += "\n";
 				}
 				row += line;
-	
+
 				if (quoteCount % 2 == 0) {
 					if (firstRowRead) {
 						parseRow(row);
-					}	
+					}
 					else {
 						firstRowRead = true;
 					}
 					row = "";
 					quoteCount = 0;
 				}
-	
+
 			}
 		} catch (FileNotFoundException e) {
 		} catch (IOException e) {
@@ -80,32 +91,21 @@ public class CsvLoader {
 	}
 
 	private void parseRow(String row) {
-		System.out.println("========START========");
-		System.out.println(row);
-		System.out.println("========END========");
 		Matcher m = ROW_PATTERN.matcher(row);
-		String name;
-		int calories;
-		String ingredients;
-		Time preptime;
-		Time cooktime;
-		int difficulty;
-		int rating;
-		String instruction;
-		String dietary;
 		if (m.matches()) {
-			name = extractCell(m, 1);
-			calories = Integer.parseInt(extractCell(m, 2));
-			ingredients = extractCell(m, 3);
-			preptime = Time.valueOf(extractCell(m, 4));
-			cooktime = Time.valueOf(extractCell(m, 5));
-			difficulty = Integer.parseInt(extractCell(m, 6));
-			rating = Integer.parseInt(extractCell(m, 7));
-			instruction = extractCell(m, 8);
-			dietary = extractCell(m, 9);
-			System.out.println(ingredients);
+			String name = extractCell(m, 1);
+			int calories = Integer.parseInt(extractCell(m, 2));
+			String ingredients = extractCell(m, 3);
+			Time preptime = Time.valueOf(extractCell(m, 4));
+			Time cooktime = Time.valueOf(extractCell(m, 5));
+			int difficulty = Integer.parseInt(extractCell(m, 6));
+			int rating = Integer.parseInt(extractCell(m, 7));
+			String instructions = extractCell(m, 8);
+			String dietary = extractCell(m, 9);
+			db.addRecipe(new Recipe(0, name, calories, ingredients, preptime, cooktime, difficulty,
+					rating, instructions, dietary));
 		}
-	
+
 	}
 
 }

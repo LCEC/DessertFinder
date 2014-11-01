@@ -1,34 +1,33 @@
-package org.jointheleague.le.recipes;
+ package org.jointheleague.le.recipes;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.Reader;
 import java.net.URISyntaxException;
-import java.net.URL;
-import java.sql.Time;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class RecipeBook {
 
 	private DataInterface db = new DataAccessObjectAlt();
+	private static final Logger LOGGER = Logger
+			.getLogger(DataAccessObject.class.getCanonicalName());
 
 	public static void main(String[] args) {
-		try {
-			new CsvLoader().loadRecipes();
-		} catch (URISyntaxException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+			new RecipeBook().run();
 	}
 
 	public void run() {
 		System.out.println("Opening the database ...");
 		db.open();
+		
+		System.out.println("Loading CSV file ...");
+		try {
+			new CsvLoader(db).loadRecipes();
+		} catch (URISyntaxException e) {
+			LOGGER.log(Level.SEVERE, "Loading CSV file failed.");
+		}
+		
+		
+		
 		System.out.println("Adding some recipes ...");
 
 		System.out.println("Printing out all recipes in the db...");

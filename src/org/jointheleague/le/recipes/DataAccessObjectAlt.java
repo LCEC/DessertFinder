@@ -74,4 +74,17 @@ public class DataAccessObjectAlt implements DataInterface{
 		
 	}
 
+	@Override
+	public List<Recipe> searchByIngredient(String ingredient) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public List<Recipe> searchMultiple(String name, int maxCalories,
+			String ingredient) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }

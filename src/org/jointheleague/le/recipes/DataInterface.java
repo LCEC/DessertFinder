@@ -8,6 +8,8 @@ public interface DataInterface {
 	public void updateRecipe(int id, Recipe recipe);
 	public List<Recipe> searchByCalories(int maxCalories);
 	public List<Recipe> searchByName(String name);
+	public List<Recipe> searchByIngredient(String ingredient);
+	public List<Recipe> searchMultiple(String name, int maxCalories, String ingredient);
 	public void deleteAllData();
 	public void close();
 }

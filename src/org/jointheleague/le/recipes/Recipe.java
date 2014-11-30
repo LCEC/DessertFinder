@@ -44,12 +44,39 @@ public class Recipe {
 
 	}
 
-
+	@Override
 	public String toString() {
-		// return "[ id = "+ getId() + ", name = " +getName() + ", calories = "+
-		// getCalories() + " ]" ;
-		return String.format("[ id = %d, name = %s, calories = %d ]", getId(),
-				getName(), getCalories());
+		StringBuilder sb = new StringBuilder();
+	sb.append("Id: ");
+	sb.append(id);
+	sb.append("\n");
+	sb.append("Name: ");
+	sb.append(name);
+	sb.append("\n");
+	sb.append("Calories: ");
+	sb.append(calories);
+	sb.append("\n");
+	sb.append("Ingredients:");
+	sb.append(ingredients);
+	sb.append("\n");
+	sb.append("Prep time: ");
+	sb.append(preptime);
+	sb.append("\n");
+	sb.append("Cook time: ");
+	sb.append(cooktime);
+	sb.append("\n");
+	sb.append("Difficulty: ");
+	sb.append(difficulty);
+	sb.append("\n");
+	sb.append("Rating: ");
+	sb.append(rating);
+	sb.append("\n");
+	sb.append("Instructions: ");
+	sb.append(instructions);
+	sb.append("\n");
+	sb.append("Dietary: ");
+	sb.append(dietary);
+		return sb.toString();
 
 	}
 
@@ -66,42 +93,32 @@ public class Recipe {
 	}
 
 	public String getIngredients() {
-		// TODO Auto-generated method stub
-		return null;
+		return ingredients;
 	}
 
 	public Time getPrepTime() {
-		// TODO Auto-generated method stub
 		return preptime;
 	}
 
-	private Time getCookTime() {
-		// TODO Auto-generated method stub
+	public Time getCookTime() {
 		return cooktime;
 	}
 
 	public int getDifficulty() {
-		// TODO Auto-generated method stub
-		return 0;
+		return difficulty;
 	}
 
 	public int getRating() {
-		// TODO Auto-generated method stub
-		return 0;
+		return rating;
 	}
 
 	public String getInstructions() {
-		// TODO Auto-generated method stub
-		return null;
+		return instructions;
 	}
 
 	public String getDietary() {
-		// TODO Auto-generated method stub
-		return null;
+		return dietary;
 	}
 	
-	private Time StringtoTime(String timeString){
-		return Time.valueOf(timeString);		
-	}
 
 }

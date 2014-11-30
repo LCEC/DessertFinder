@@ -1,4 +1,5 @@
 package org.jointheleague.le.recipes;
+
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -9,21 +10,24 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class DataAccessObject implements DataInterface {
 
-	private static final Logger LOGGER = Logger
-			.getLogger(DataAccessObject.class.getCanonicalName());
+	public static final Logger LOGGER = Logger.getLogger(DataAccessObject.class
+			.getCanonicalName());
 	private static final String DB_URL = "jdbc:derby:"
-			+ System.getProperty("user.home") + "/databases/recipesDB";
+			+ System.getProperty("user.dir") + "/databases/recipesDB";
 
 	// Some statements
 	private Statement statement;
 	private PreparedStatement psInsert;
 	private PreparedStatement psUpdate;
-	private PreparedStatement psSearchByCal;
 	private PreparedStatement psSearchByName;
+	private PreparedStatement psSearchByCalories;
+	private PreparedStatement psSearchByIngredient;
+	private PreparedStatement psSearchMultiple;
 
 	private Connection connection = null;
 
@@ -51,23 +55,23 @@ public class DataAccessObject implements DataInterface {
 	}
 
 	public int addRecipe(Recipe recipe) {
-		/*					+ ", name VARCHAR(100)"
-					+ ", calories INTEGER)"
-					+ ", ingredients VARCHAR(2000)"
-					+ ", preptime TIME"
-					+ ", difficulty INTEGER)"
-					+ ", rating INTEGER)"
-					+ ", instructions VARCHAR(3000)"
-					+ ", dietary VARCHAR(2000)"; */
+		List<Recipe> alreadyindb = searchByName(recipe.getName());
+		if (!alreadyindb.isEmpty()) {
+			LOGGER.log(Level.WARNING,
+					"Recipe with the name " + recipe.getName()
+							+ " is already in the database.");
+			return 0;
+		}
 		try {
 			psInsert.setString(1, recipe.getName());
 			psInsert.setInt(2, recipe.getCalories());
 			psInsert.setString(3, recipe.getIngredients());
 			psInsert.setTime(4, recipe.getPrepTime());
-			psInsert.setInt(5, recipe.getDifficulty());
-			psInsert.setInt(6, recipe.getRating());
-			psInsert.setString(7, recipe.getInstructions());
-			psInsert.setString(8, recipe.getDietary());
+			psInsert.setTime(5, recipe.getCookTime());
+			psInsert.setInt(6, recipe.getDifficulty());
+			psInsert.setInt(7, recipe.getRating());
+			psInsert.setString(8, recipe.getInstructions());
+			psInsert.setString(9, recipe.getDietary());
 			psInsert.executeUpdate();
 			ResultSet results = psInsert.getGeneratedKeys();
 			int id = 0;
@@ -96,12 +100,15 @@ public class DataAccessObject implements DataInterface {
 
 	public List<Recipe> searchByCalories(int maxCalories) {
 		try {
-			psSearchByCal.setInt(1, maxCalories);
-			ResultSet rs = psSearchByCal.executeQuery();
+			psSearchByCalories.setInt(1, maxCalories);
+			ResultSet rs = psSearchByCalories.executeQuery();
 			List<Recipe> result = new ArrayList<Recipe>();
 			while (rs.next()) {
-				//"INSERT INTO recipes (name, calories, ingredients, preptime, cooktime, difficulty, rating, instructions, dietary) "
-				result.add(new Recipe(rs.getInt(1), rs.getString(2), rs.getInt(3), rs.getString(4), rs.getTime(5), rs.getTime(6), rs.getInt(7), rs.getInt(8), rs.getString(9), rs.getString(10)));
+				// "INSERT INTO recipes (name, calories, ingredients, preptime, cooktime, difficulty, rating, instructions, dietary) "
+				result.add(new Recipe(rs.getInt(1), rs.getString(2), rs
+						.getInt(3), rs.getString(4), rs.getTime(5), rs
+						.getTime(6), rs.getInt(7), rs.getInt(8), rs
+						.getString(9), rs.getString(10)));
 			}
 			rs.close();
 			return result;
@@ -111,13 +118,57 @@ public class DataAccessObject implements DataInterface {
 		}
 	}
 
-	public List<Recipe> searchByName(String name)  {
+	public List<Recipe> searchByName(String name) {
 		try {
 			psSearchByName.setString(1, name.toLowerCase());
 			ResultSet rs = psSearchByName.executeQuery();
 			List<Recipe> result = new ArrayList<Recipe>();
 			while (rs.next()) {
-				result.add(new Recipe(rs.getInt(1), rs.getString(2), rs.getInt(3), rs.getString(4), rs.getTime(5), rs.getTime(6), rs.getInt(7), rs.getInt(8), rs.getString(9), rs.getString(10)));
+				result.add(new Recipe(rs.getInt(1), rs.getString(2), rs
+						.getInt(3), rs.getString(4), rs.getTime(5), rs
+						.getTime(6), rs.getInt(7), rs.getInt(8), rs
+						.getString(9), rs.getString(10)));
+			}
+			rs.close();
+			return result;
+		} catch (SQLException e) {
+			logSQLException(e);
+			return null;
+		}
+	}
+
+	public List<Recipe> searchByIngredient(String ingredient) {
+		try {
+			psSearchByIngredient.setString(1, "%"+ingredient.toLowerCase()+"%");
+			
+			ResultSet rs = psSearchByIngredient.executeQuery();
+			List<Recipe> result = new ArrayList<Recipe>();
+			while (rs.next()) {
+				result.add(new Recipe(rs.getInt(1), rs.getString(2), rs
+						.getInt(3), rs.getString(4), rs.getTime(5), rs
+						.getTime(6), rs.getInt(7), rs.getInt(8), rs
+						.getString(9), rs.getString(10)));
+			}
+			rs.close();
+			return result;
+		} catch (SQLException e) {
+			logSQLException(e);
+			return null;
+		}
+	}
+	@Override
+	public List<Recipe> searchMultiple(String name ,int maxCalories, String ingredient) {
+		try {
+			psSearchMultiple.setString(1, "%"+name.toLowerCase()+"%");
+			psSearchMultiple.setInt(2, maxCalories);
+			psSearchMultiple.setString(3, "%"+ingredient.toLowerCase()+"%");
+			ResultSet rs = psSearchMultiple.executeQuery();
+			List<Recipe> result = new ArrayList<Recipe>();
+			while (rs.next()) {
+				result.add(new Recipe(rs.getInt(1), rs.getString(2), rs
+						.getInt(3), rs.getString(4), rs.getTime(5), rs
+						.getTime(6), rs.getInt(7), rs.getInt(8), rs
+						.getString(9), rs.getString(10)));
 			}
 			rs.close();
 			return result;
@@ -158,8 +209,7 @@ public class DataAccessObject implements DataInterface {
 		return props;
 	}
 
-	private Connection connect()
-			throws SQLException {
+	private Connection connect() throws SQLException {
 		Connection connection = DriverManager.getConnection(DB_URL
 				+ ";create=true", dbProperties);
 
@@ -171,15 +221,11 @@ public class DataAccessObject implements DataInterface {
 		try {
 			String sqlExpression = "CREATE TABLE recipes ("
 					+ "id INTEGER NOT NULL PRIMARY KEY GENERATED ALWAYS AS IDENTITY (START WITH 1, INCREMENT BY 1)"
-					+ ", name VARCHAR(100)"
-					+ ", calories INTEGER)"
-					+ ", ingredients VARCHAR(2000)"
-					+ ", preptime TIME"
-					+ ", cooktime TIME"
-					+ ", difficulty INTEGER)"
-					+ ", rating INTEGER)"
-					+ ", instructions VARCHAR(3000)"
-					+ ", dietary VARCHAR(2000)";
+					+ ", name VARCHAR(100)" + ", calories INTEGER"
+					+ ", ingredients VARCHAR(2000)" + ", preptime TIME"
+					+ ", cooktime TIME" + ", difficulty INTEGER"
+					+ ", rating INTEGER" + ", instructions VARCHAR(3000)"
+					+ ", dietary VARCHAR(2000)" + ")";
 
 			statement.execute(sqlExpression);
 			LOGGER.info("Created table recipes");
@@ -194,13 +240,13 @@ public class DataAccessObject implements DataInterface {
 	 * This methods initializes all the statements that we use to talk to the
 	 * database.
 	 */
-	private void initializeStatements()
-			throws SQLException {
+	private void initializeStatements() throws SQLException {
 
-		psInsert = connection.prepareStatement(
-				"INSERT INTO recipes (name, calories, ingredients, preptime, cooktime, difficulty, rating, instructions, dietary) "
-				+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
-				Statement.RETURN_GENERATED_KEYS);
+		psInsert = connection
+				.prepareStatement(
+						"INSERT INTO recipes (name, calories, ingredients, preptime, cooktime, difficulty, rating, instructions, dietary) "
+								+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+						Statement.RETURN_GENERATED_KEYS);
 		statements.add(psInsert);
 
 		psUpdate = connection.prepareStatement(
@@ -208,25 +254,31 @@ public class DataAccessObject implements DataInterface {
 				Statement.RETURN_GENERATED_KEYS);
 		statements.add(psUpdate);
 
-		psSearchByCal = connection.prepareStatement(
-				"SELECT * FROM recipes WHERE calories <= ? ORDER BY name");
-		statements.add(psSearchByCal);
+		psSearchByCalories = connection
+				.prepareStatement("SELECT * FROM recipes WHERE calories <= ? ORDER BY name");
+		statements.add(psSearchByCalories);
 
-		psSearchByName = connection.prepareStatement(
-				"SELECT * FROM recipes WHERE LOWER(name) LIKE ? ORDER BY name");
+		psSearchByName = connection
+				.prepareStatement("SELECT * FROM recipes WHERE LOWER(name) LIKE ? ORDER BY name");
 		statements.add(psSearchByName);
+
+		psSearchByIngredient = connection
+				.prepareStatement("SELECT * FROM recipes WHERE LOWER(ingredients) LIKE ? ORDER BY name");
+		statements.add(psSearchByIngredient);
+		psSearchMultiple = connection.prepareStatement("SELECT * FROM recipes WHERE LOWER(name) LIKE ?"
+				+ " AND calories <= ? "
+				+ "AND LOWER(ingredients) LIKE ? ORDER BY name");
 	}
 
 	private void shutDownDB() {
 
 		try {
 			// the shutdown=true attribute shuts down Derby
-			DriverManager.getConnection(DB_URL
-					+ ";shutdown=true", dbProperties);
+			DriverManager
+					.getConnection(DB_URL + ";shutdown=true", dbProperties);
 
 		} catch (SQLException se) {
-			if (se.getErrorCode() == 45000 && "08006".equals(se
-					.getSQLState())) {
+			if (se.getErrorCode() == 45000 && "08006".equals(se.getSQLState())) {
 				// we got the expected exception
 				LOGGER.info("Database shut down normally");
 				// Note that for single database shutdown, the expected
@@ -267,16 +319,17 @@ public class DataAccessObject implements DataInterface {
 	private static void logSQLException(SQLException e) {
 		// Unwraps the entire exception chain to unveil the real cause of the
 		// Exception.
-		while (e != null)
-		{
-			LOGGER.severe("\n----- SQLException -----\n"
-					+ "  SQL State:  " + e.getSQLState() + "\n"
-					+ "  Error Code: " + e.getErrorCode() + "\n"
-					+ "  Message:    " + e.getMessage());
+		while (e != null) {
+			LOGGER.severe("\n----- SQLException -----\n" + "  SQL State:  "
+					+ e.getSQLState() + "\n" + "  Error Code: "
+					+ e.getErrorCode() + "\n" + "  Message:    "
+					+ e.getMessage());
 			// for stack traces, refer to derby.log or uncomment this:
 			// e.printStackTrace(System.err);
 			e = e.getNextException();
 		}
 	}
+
+	
 
 }

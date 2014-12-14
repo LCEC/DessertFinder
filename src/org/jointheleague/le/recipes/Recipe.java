@@ -47,34 +47,33 @@ public class Recipe {
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-	sb.append("Id: ");
+	sb.append("Id:");
 	sb.append(id);
-	sb.append("\n");
 	sb.append("Name: ");
 	sb.append(name);
-	sb.append("\n");
+	sb.append("\n\n");
 	sb.append("Calories: ");
 	sb.append(calories);
-	sb.append("\n");
+	sb.append("\n\n");
 	sb.append("Ingredients:");
 	sb.append(ingredients);
-	sb.append("\n");
+	sb.append("\n\n");
 	sb.append("Prep time: ");
 	sb.append(preptime);
-	sb.append("\n");
+	sb.append("\n\n");
 	sb.append("Cook time: ");
 	sb.append(cooktime);
-	sb.append("\n");
+	sb.append("\n\n");
 	sb.append("Difficulty: ");
 	sb.append(difficulty);
-	sb.append("\n");
+	sb.append("\n\n");
 	sb.append("Rating: ");
 	sb.append(rating);
-	sb.append("\n");
+	sb.append("\n\n");
 	sb.append("Instructions: ");
 	sb.append(instructions);
-	sb.append("\n");
-	sb.append("Dietary: ");
+	sb.append("\n\n");
+	sb.append("Dietary");
 	sb.append(dietary);
 		return sb.toString();
 

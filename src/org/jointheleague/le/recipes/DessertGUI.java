@@ -6,8 +6,11 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.swing.DefaultListModel;
 import javax.swing.Icon;
@@ -38,7 +41,8 @@ public class DessertGUI implements Runnable {
 	private JList resultList;
 	private DefaultListModel resultListModel = new DefaultListModel();
 	private DataInterface db = new DataAccessObject();
-
+	private static final Logger LOGGER = Logger
+			.getLogger(DataAccessObject.class.getCanonicalName());
 	// private ActionListener goButtonListener = new ActionListener(){
 	// @Override
 	// public void actionPerformed(ActionEvent arg0) {
@@ -60,6 +64,12 @@ public class DessertGUI implements Runnable {
 	public static void main(String[] args) {
 		DessertGUI gui = new DessertGUI();
 		gui.db.open();
+		LOGGER.log(Level.INFO,"Loading CSV file ...");
+		try {
+			new CsvLoader(gui.db).loadRecipes();
+		} catch (URISyntaxException e) {
+			LOGGER.log(Level.SEVERE, "Loading CSV file failed.");
+		}
 		SwingUtilities.invokeLater(gui);
 	}
 
@@ -134,9 +144,11 @@ public class DessertGUI implements Runnable {
 			return;
 		}
 		String entry = (String) resultList.getSelectedValue();
+		if(entry!=null){
 		List<Recipe> result = db.searchByName(entry);
 		Recipe recipe = result.get(0);
 		createRecipeDialog(recipe).setVisible(true);
+		}
 		
 	}
 

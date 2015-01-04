@@ -103,8 +103,9 @@ public class CsvLoader {
 			int rating = Integer.parseInt(extractCell(m, 7));
 			String instructions = extractCell(m, 8);
 			String dietary = extractCell(m, 9);
-			db.addRecipe(new Recipe(0, name, calories, ingredients, preptime, cooktime, difficulty,
-					rating, instructions, dietary));
+			db.addRecipe(new Recipe(0, name, calories, ingredients,
+					preptime, cooktime, difficulty, rating, 
+					instructions, dietary));
 		}
 
 	}
